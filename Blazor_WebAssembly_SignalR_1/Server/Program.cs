@@ -1,3 +1,4 @@
+using Blazor_WebAssembly_SignalR_1.Server;
 using Microsoft.AspNetCore.ResponseCompression;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,7 +8,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
+// Injections Services
+builder.Services.AddSignalR();
+builder.Services.AddResponseCompression( o =>
+{
+    o.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
+});
+
 var app = builder.Build();
+
+// Injenctions App
+app.UseResponseCompression();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -28,9 +39,11 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-
 app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
+
+// Injenctions App
+app.MapHub<TextHub>("/texthub");
 
 app.Run();
