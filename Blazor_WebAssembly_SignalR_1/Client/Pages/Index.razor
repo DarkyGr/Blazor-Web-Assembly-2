@@ -1,6 +1,7 @@
 ﻿@page "/"
 
 @using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager navManager
 @implements IAsyncDisposable
 
 <div class="row">
@@ -28,9 +29,9 @@
 
     protected override async Task OnInitializedAsync()
     {
-        hubConnection = new HubConnectionBuilder().WithUrl("/texthub").Build();
+        hubConnection = new HubConnectionBuilder().WithUrl(navManager.ToAbsoluteUri("/texthub")).Build();
 
-        hubConnection.On<string>("ReceivedInformation", (receiveText) =>
+        hubConnection.On<string>("ReceiveInformation", (receiveText) =>
         {
             texts.Add(receiveText);
             text = "";
@@ -38,11 +39,13 @@
             // Decalre change **IMPORTANT
             StateHasChanged();
         });
+
+        await hubConnection.StartAsync();
     }
 
     async Task Send() => await hubConnection.SendAsync("Send", text);
 
-    public async ValueTask DisposeAync()
+    public async ValueTask DisposeAsync()
     {
         await hubConnection.DisposeAsync();
     }
