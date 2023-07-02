@@ -1,9 +1,49 @@
 ﻿@page "/"
 
-<PageTitle>Index</PageTitle>
+@using Microsoft.AspNetCore.SignalR.Client
+@implements IAsyncDisposable
 
-<h1>Hello, world!</h1>
+<div class="row">
+    <div class="col-12">
+        <label> Text </label>
+        <input type="text" @bind="text"/>
+        <button @onclick="Send"> Send</button>
+    </div>
+</div>
 
-Welcome to your new app.
+<div class="row">
+    <div class="col-12">
+        @foreach (var t in texts)
+        {
+            <p>@t</p>
+        }
+    </div>
+</div>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+
+@code{
+    private HubConnection hubConnection;
+    private string text;
+    List<string> texts = new List<string>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder().WithUrl("/texthub").Build();
+
+        hubConnection.On<string>("ReceivedInformation", (receiveText) =>
+        {
+            texts.Add(receiveText);
+            text = "";
+
+            // Decalre change **IMPORTANT
+            StateHasChanged();
+        });
+    }
+
+    async Task Send() => await hubConnection.SendAsync("Send", text);
+
+    public async ValueTask DisposeAync()
+    {
+        await hubConnection.DisposeAsync();
+    }
+}
