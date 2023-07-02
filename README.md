@@ -6,3 +6,6 @@ This app was made with:
 
 Requirements when creating the project
 - [Check] ASP.NET Core Hosted
+
+Required packages (Blazor_WebAssembly_SignalR_1.Client):
+- Microsoft.AspNetCore.SignalR.Client 7.0.8
